@@ -1,52 +1,56 @@
 package com.kannaan.admin.controller;
 
 import java.util.List;
-import java.util.Map;
 
+import com.kannaan.admin.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import com.kannaan.admin.model.Order;
-import com.kannaan.admin.repository.OrderRepository;
-
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 
 @RestController
 @RequestMapping("/api/orders")
 public class OrderController {
     
     @Autowired
-    private OrderRepository orderRepository;
+    private final OrderService orderService;
+
+    @Autowired
+    public OrderController(OrderService orderService){
+        this.orderService = orderService;
+    }
 
     @PostMapping
-    public Order createOrder(@RequestBody Order order){
-        return orderRepository.save(order);
+    public ResponseEntity<Order> createOrder(@RequestBody Order order){
+        System.out.println(order);
+        return ResponseEntity.ok(orderService.createOrder(order));
     }
 
     @GetMapping
-    public List<Order> getAllOrders() {
-        return orderRepository.findAll();
+    public ResponseEntity<List<Order>> getAllOrders() {
+        return ResponseEntity.ok(orderService.getAllOrders());
     }
 
     @GetMapping("/{id}")
-    public Order getOrderById(@PathVariable String id) {
-        return orderRepository.findById(id).orElse(null);
+    public ResponseEntity<Order> getOrderById(@PathVariable String id) {
+        return orderService.getOrderById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @PutMapping("/{id}")
-    public Order updateOrderStatus(@PathVariable String id, @RequestBody Map<String, String> updates) {
-        return orderRepository.findById(id)
-                .map(order -> {
-                    if (updates.containsKey("status")) {
-                    order.setStatus(updates.get("status"));
-                }                      
-                    return orderRepository.save(order);
-                })
-                .orElse(null);
+    public ResponseEntity<Order> updateOrder(@PathVariable String id, @RequestBody Order updatedOrder) {
+        try{
+            return ResponseEntity.ok(orderService.updateOrder(id, updatedOrder));
+        }catch (RuntimeException e){
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteOder(@PathVariable String id){
+        orderService.deleteOrder(id);
+        return ResponseEntity.noContent().build();
     }
 }
