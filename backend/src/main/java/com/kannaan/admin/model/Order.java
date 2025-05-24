@@ -5,7 +5,9 @@ import java.util.List;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Getter
@@ -15,16 +17,21 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @AllArgsConstructor
 @Builder
 @Document(collection = "orders")
+
 public class Order {
 
     @Id
     private String id;
     @NotBlank
     private String customerName;
-
-    private List<String> productIds;
-    private int quantity;
+    private List<OrderItem> items;
+    private double totalPrice;
     private String status;
-    private LocalDateTime orderDate;
+
+    @CreatedDate
+    private LocalDateTime createdAt;
+
+    @LastModifiedDate
+    private LocalDateTime updatedAt;
     
 }

@@ -44,6 +44,7 @@ public class OrderController {
         try{
             return ResponseEntity.ok(orderService.updateOrder(id, updatedOrder));
         }catch (RuntimeException e){
+            System.out.println("Unable to process the request::"+ e.getMessage());
             return ResponseEntity.notFound().build();
         }
     }
